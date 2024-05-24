@@ -1,21 +1,14 @@
-
-#include <Arduino.h>
-#include <U8g2lib.h>
-
-#define LED_PIN GPIO_NUM_2
-#define ENCODER_KEY GPIO_NUM_15
-#define ENCODER_S1 GPIO_NUM_16
-#define ENCODER_S2 GPIO_NUM_4
+#include "main.h"
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* clock=*/SCL, /* data=*/SDA, /* reset=*/U8X8_PIN_NONE);
 
-static int16_t encoder_last_state;
-static int16_t encoder_state;
-static int16_t encoder_count;
+int16_t encoder_last_state;
+int16_t encoder_state;
+int16_t encoder_count;
 
-static bool led_state = LOW;
-static bool need_screen_output = true;
-static bool need_serial_output = false;
+bool led_state = LOW;
+bool need_screen_output = true;
+bool need_serial_output = false;
 
 hw_timer_t *timer = nullptr;
 
@@ -40,32 +33,65 @@ void IRAM_ATTR timer_interrupt_handler()
     }
     encoder_last_state = encoder_state;
 }
+#pragma region init
 
-void setup()
+void oled_init()
 {
     u8g2.begin();
-    Serial.begin(115200);
-    pinMode(LED_PIN, OUTPUT);
-    pinMode(ENCODER_KEY, INPUT_PULLUP);
-    pinMode(ENCODER_S1, INPUT_PULLUP);
-    pinMode(ENCODER_S2, INPUT_PULLUP);
-    digitalWrite(LED_PIN, led_state);
-    delay(1000);
 
-    encoder_state = digitalRead(ENCODER_S1);
-    encoder_last_state = encoder_state;
-    encoder_count = 0;
-
+    u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_ncenB08_tr);
     u8g2.clearBuffer();
     u8g2.drawStr(0, 10, "Hello, QZX!");
     u8g2.sendBuffer();
+}
 
+void encoder_init()
+{
+    pinMode(ENCODER_S1, INPUT_PULLUP);
+    pinMode(ENCODER_S2, INPUT_PULLUP);
+
+    encoder_state = digitalRead(ENCODER_S1);
+    encoder_last_state = encoder_state;
+    encoder_count = 0;
+}
+
+void led_init()
+{
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, led_state);
+}
+
+void key_init()
+{
+    pinMode(ENCODER_KEY, INPUT_PULLUP);
+}
+
+void serial_init()
+{
+
+    Serial.begin(115200);
+    Serial.println("qingzhixing sama!");
+}
+
+void timer_init()
+{
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &timer_interrupt_handler, true);
     timerAlarmWrite(timer, 100ul, true);
     timerAlarmEnable(timer);
 }
+
+void setup()
+{
+    oled_init();
+    encoder_init();
+    led_init();
+    key_init();
+    serial_init();
+    timer_init();
+}
+#pragma endregion
 
 void toggle_led()
 {

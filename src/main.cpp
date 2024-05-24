@@ -1,57 +1,104 @@
 
 #include <Arduino.h>
+#include <U8g2lib.h>
 
-#define TOUCH_READ 0x0
-#define TOUCH_INTERRUPT 0x1
-#define PIN_INTERRUPT 0x2
+#define LED_PIN GPIO_NUM_2
+#define ENCODER_KEY GPIO_NUM_15
+#define ENCODER_S1 GPIO_NUM_16
+#define ENCODER_S2 GPIO_NUM_4
 
-#define TOUCH_HANDLE_MODE TOUCH_INTERRUPT
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* clock=*/SCL, /* data=*/SDA, /* reset=*/U8X8_PIN_NONE);
 
-#define TOUCH_PIN T0
-// 阈值，touch value低于则发生中断
-#define THRESHOLD 40
+static int16_t encoder_last_state;
+static int16_t encoder_state;
+static int16_t encoder_count;
 
-#define LED_PIN 2
-
-static bool eventOccured = false;
-
-void TouchEvent()
-{
-	Serial.printf("Touch Event.\r\n");
-	eventOccured = true;
-}
-
-void PinEvent()
-{
-	eventOccured = true;
-}
+static bool led_state = LOW;
+static bool enable_screen = true;
 
 void setup()
 {
-	// put your setup code here, to run once:
-	Serial.begin(115200);
-	pinMode(LED_PIN, OUTPUT);
+    u8g2.begin();
+    Serial.begin(115200);
+    pinMode(LED_PIN, OUTPUT);
+    pinMode(ENCODER_KEY, INPUT_PULLUP);
+    pinMode(ENCODER_S1, INPUT_PULLUP);
+    pinMode(ENCODER_S2, INPUT_PULLUP);
+    digitalWrite(LED_PIN, led_state);
+    delay(1000);
 
-#if TOUCH_HANDLE_MODE == TOUCH_INTERRUPT
-	touchAttachInterrupt(TOUCH_PIN, TouchEvent, THRESHOLD);
-#elif TOUCH_HANDLE_MODE == PIN_INTERRUPT
-	// 引脚接GND触发
-	pinMode(TOUCH_PIN, INPUT_PULLUP);
-	attachInterrupt(digitalPinToInterrupt(TOUCH_PIN), PinEvent, FALLING);
-#endif
+    encoder_state = digitalRead(ENCODER_S1);
+    encoder_last_state = encoder_state;
+    encoder_count = 0;
+}
+
+void toggle_led()
+{
+    led_state = !led_state;
+    digitalWrite(LED_PIN, led_state);
+}
+void toggle_screen()
+{
+    enable_screen = !enable_screen;
+    if (enable_screen)
+    {
+        u8g2.sleepOff();
+    }
+    else
+    {
+        u8g2.sleepOn();
+    }
+}
+
+static bool need_serial_output = false;
+void serial_output()
+{
+    if (!need_serial_output)
+        return;
+    need_serial_output = false;
+    Serial.printf("Count: %d, Value: %d\r\n", encoder_count, encoder_count / 2);
+    Serial.printf("LED State: %s\r\n", led_state ? "ON" : "OFF");
+    Serial.printf("Screen State: %s\r\n", enable_screen ? "ON" : "OFF");
+}
+
+void screen_output()
+{
+    u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_ncenB08_tr);
+    u8g2.drawStr(0, 10, "Encoder Value:");
+    u8g2.setCursor(40, 10);
+    u8g2.print(encoder_count / 2);
+    u8g2.drawStr(0, 30, "LED State:");
+    u8g2.setCursor(40, 30);
+    u8g2.print(led_state ? "ON" : "OFF");
+    u8g2.drawStr(0, 50, "Screen State:");
+    u8g2.sendBuffer();
 }
 
 void loop()
 {
-	digitalWrite(LED_PIN, LOW);
-#if TOUCH_HANDLE_MODE == TOUCH_READ
-	Serial.printf("touch value: %d\r\n", touchRead(TOUCH_PIN));
-#endif
-	// 防止中断阻塞崩溃
-	if (eventOccured)
-	{
-		eventOccured = false;
-		digitalWrite(LED_PIN, HIGH);
-	}
-	delay(200);
+
+    encoder_state = digitalRead(ENCODER_S1);
+    if (encoder_state != encoder_last_state)
+    {
+        if (digitalRead(ENCODER_S2) == encoder_state)
+        {
+            encoder_count++;
+        }
+        else
+        {
+            encoder_count--;
+        }
+    }
+    encoder_last_state = encoder_state;
+
+    if (digitalRead(ENCODER_KEY) == LOW)
+    {
+        toggle_led();
+        toggle_screen();
+        while (digitalRead(ENCODER_KEY) == LOW)
+        {
+            delay(10);
+        }
+    }
 }

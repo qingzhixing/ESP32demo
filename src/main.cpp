@@ -1,18 +1,13 @@
 #include "main.h"
 
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* clock=*/SCL, /* data=*/SDA, /* reset=*/U8X8_PIN_NONE);
-
 int16_t encoder_last_state;
 int16_t encoder_state;
 int16_t encoder_count;
 
-bool led_state = LOW;
 bool need_screen_output = true;
 bool need_serial_output = false;
 
 hw_timer_t *timer = nullptr;
-
-void toggle_led();
 void serial_output();
 void screen_output();
 
@@ -33,18 +28,6 @@ void IRAM_ATTR timer_interrupt_handler()
     }
     encoder_last_state = encoder_state;
 }
-#pragma region init
-
-void oled_init()
-{
-    u8g2.begin();
-
-    u8g2.clearBuffer();
-    u8g2.setFont(u8g2_font_ncenB08_tr);
-    u8g2.clearBuffer();
-    u8g2.drawStr(0, 10, "Hello, QZX!");
-    u8g2.sendBuffer();
-}
 
 void encoder_init()
 {
@@ -54,12 +37,6 @@ void encoder_init()
     encoder_state = digitalRead(ENCODER_S1);
     encoder_last_state = encoder_state;
     encoder_count = 0;
-}
-
-void led_init()
-{
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, led_state);
 }
 
 void key_init()
@@ -91,13 +68,6 @@ void setup()
     serial_init();
     timer_init();
 }
-#pragma endregion
-
-void toggle_led()
-{
-    led_state = !led_state;
-    digitalWrite(LED_PIN, led_state);
-}
 
 void serial_output()
 {
@@ -105,12 +75,13 @@ void serial_output()
         return;
     need_serial_output = false;
     Serial.printf("Count: %d, Value: %d\r\n", encoder_count, int(encoder_count / 2));
-    Serial.printf("LED State: %s\r\n", led_state == LOW ? "OFF" : "ON");
+    Serial.printf("LED State: %s\r\n", get_led_state() == LOW ? "OFF" : "ON");
     Serial.printf("Screen Output: %s\r\n", need_screen_output ? "ON" : "OFF");
 }
 
 void screen_output()
 {
+    auto u8g2 = get_u8g2();
     u8g2.clearBuffer();
     if (!need_screen_output)
         return;
@@ -119,7 +90,7 @@ void screen_output()
     u8g2.print(int(encoder_count / 2));
     u8g2.drawStr(0, 30, "LED State:");
     u8g2.setCursor(100, 30);
-    u8g2.print(led_state == LOW ? "OFF" : "ON");
+    u8g2.print(get_led_state() == LOW ? "OFF" : "ON");
     u8g2.sendBuffer();
 }
 
@@ -130,7 +101,7 @@ void loop()
 
     if (digitalRead(ENCODER_KEY) == LOW)
     {
-        toggle_led();
+        led_toggle();
         need_serial_output = true;
         while (digitalRead(ENCODER_KEY) == LOW)
             delay(10);

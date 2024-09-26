@@ -41,7 +41,7 @@ void screen_output()
     auto u8g2 = get_u8g2();
     u8g2.clearBuffer();
     // u8g2.drawCircle(circle_x + delta_x, circle_y, circle_r);
-    u8g2.drawFilledEllipse(circle_x + delta_x, circle_y, circle_r, circle_r);
+    u8g2.drawFilledEllipse(circle_x + delta_x, circle_y, circle_r, abs(circle_r + delta_x / 2));
     u8g2.sendBuffer();
 }
 

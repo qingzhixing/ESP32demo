@@ -9,11 +9,12 @@
 #define OLED_DATA_PIN SDA
 #define OLED_RESET_PIN U8X8_PIN_NONE
 
- U8G2 oled_init();
+void oled_init();
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C &get_oled_display();
 
-/*
- * This function is used to get the global U8G2 object.
- * WARNING: This function should only be called after the OLED has been initialize!!!
- */
- U8G2 get_u8g2();
+struct Screen
+{
+    const int width = 128;
+    const int height = 64;
+};
 #endif // !_OLED_H

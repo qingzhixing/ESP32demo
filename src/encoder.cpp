@@ -1,38 +1,44 @@
 #include "encoder.h"
 #include <Arduino.h>
 
+static int16_t encoder_last_state;
+static int16_t encoder_state;
+static EncoderKeyCallback on_encoder_press_callback;
+static EncoderKeyCallback on_encoder_release_callback;
+static EncoderTurnCallback on_encoder_turn_callback;
+
 static void empty_key_callback() {}
 static void empty_turn_callback(bool) {}
 
-void Encoder::on_pressed(EncoderKeyCallback callback)
+void on_encoder_key_pressed(EncoderKeyCallback callback)
 {
     on_encoder_press_callback = callback;
 }
 
-void Encoder::on_released(EncoderKeyCallback callback)
+void on_encoder_key_released(EncoderKeyCallback callback)
 {
     on_encoder_release_callback = callback;
 }
 
-void Encoder::on_turned(EncoderTurnCallback callback)
+void on_encoder_turned(EncoderTurnCallback callback)
 {
     on_encoder_turn_callback = callback;
 }
 
-void key_interrupt_handler()
+static void key_interrupt_handler()
 {
-    static auto encoder = Encoder::get_instance();
-    if (encoder.is_pressed())
+    // FIXME!:存在崩溃问题
+    if (is_encoder_pressed())
     {
-        encoder.on_encoder_press_callback();
+        on_encoder_press_callback();
     }
     else
     {
-        encoder.on_encoder_release_callback();
+        on_encoder_release_callback();
     }
 }
 
-void Encoder::init()
+void encoder_init()
 {
     pinMode(ENCODER_S1, INPUT_PULLUP);
     pinMode(ENCODER_S2, INPUT_PULLUP);
@@ -48,9 +54,8 @@ void Encoder::init()
     attachInterrupt(digitalPinToInterrupt(ENCODER_KEY), key_interrupt_handler, CHANGE);
 }
 
-bool Encoder::update()
+void encoder_update()
 {
-    bool updated = false;
     encoder_state = digitalRead(ENCODER_S1);
     if (encoder_state != encoder_last_state)
     {
@@ -64,13 +69,11 @@ bool Encoder::update()
         {
             on_encoder_turn_callback(false);
         }
-        updated = true;
     }
     encoder_last_state = encoder_state;
-    return updated;
 }
 
-bool Encoder::is_pressed() const
+bool is_encoder_pressed()
 {
     return digitalRead(ENCODER_KEY) == ENCODER_KEY_PRESSED_LEVEL;
 }

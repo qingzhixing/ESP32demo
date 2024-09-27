@@ -1,14 +1,15 @@
 #include "main.h"
 
-static Screen *screen = nullptr;
+static Screen screen(get_u8g2());
+static Encoder encoder;
 
 hw_timer_t *timer = nullptr;
 void serial_output();
-void screen_output();
+void draw();
 
 void IRAM_ATTR timer_interrupt_handler()
 {
-    update_encoder();
+    encoder.update();
 }
 
 void timer_init()
@@ -28,7 +29,7 @@ void serial_init()
 void setup()
 {
     oled_init();
-    encoder_init();
+    encoder.init();
     led_init();
     timer_init();
     serial_init();
@@ -38,23 +39,21 @@ int16_t circle_r = 5;
 int16_t delta_x = 0;
 int16_t circle_x = 128 / 2;
 int16_t circle_y = 64 - circle_r - 5;
-void screen_output()
+void draw()
 {
-    auto u8g2 = get_u8g2();
+    auto u8g2 = screen.display;
     u8g2.clearBuffer();
-    // u8g2.drawCircle(circle_x + delta_x, circle_y, circle_r);
-    u8g2.drawFilledEllipse(circle_x + delta_x, circle_y, circle_r, circle_r);
+    u8g2.drawCircle(circle_x + delta_x, circle_y, circle_r);
     u8g2.sendBuffer();
+}
+
+void encoder_turned(bool direction)
+{
+    delta_x += direction ? 1 : -1;
 }
 
 void loop()
 {
-    screen_output();
-
-    if (digitalRead(ENCODER_KEY) == LOW)
-    {
-        led_toggle();
-        while (digitalRead(ENCODER_KEY) == LOW)
-            delay(10);
-    }
+    encoder.on_turned(encoder_turned);
+    draw();
 }

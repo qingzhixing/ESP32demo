@@ -1,43 +1,38 @@
 #include "encoder.h"
 #include <Arduino.h>
 
-static int16_t encoder_last_state;
-static int16_t encoder_state;
-static EncoderKeyCallback on_encoder_press_callback;
-static EncoderKeyCallback on_encoder_release_callback;
-static EncoderTurnCallback on_encoder_turn_callback;
-
 static void empty_key_callback() {}
 static void empty_turn_callback(bool) {}
 
-void set_on_encoder_press(EncoderKeyCallback callback)
+void Encoder::on_pressed(EncoderKeyCallback callback)
 {
     on_encoder_press_callback = callback;
 }
 
-void set_on_encoder_release(EncoderKeyCallback callback)
+void Encoder::on_released(EncoderKeyCallback callback)
 {
     on_encoder_release_callback = callback;
 }
 
-void set_on_encoder_turn(EncoderTurnCallback callback)
+void Encoder::on_turned(EncoderTurnCallback callback)
 {
     on_encoder_turn_callback = callback;
 }
 
-static void encoder_key_interrupt_handler()
+void key_interrupt_handler()
 {
-    if (is_encoder_pressed())
+    auto encoder = Encoder::get_instance();
+    if (encoder.is_pressed())
     {
-        on_encoder_press_callback();
+        encoder.on_encoder_press_callback();
     }
     else
     {
-        on_encoder_release_callback();
+        encoder.on_encoder_release_callback();
     }
 }
 
-void encoder_init()
+void Encoder::init()
 {
     pinMode(ENCODER_S1, INPUT_PULLUP);
     pinMode(ENCODER_S2, INPUT_PULLUP);
@@ -50,10 +45,10 @@ void encoder_init()
     on_encoder_release_callback = empty_key_callback;
     on_encoder_turn_callback = empty_turn_callback;
 
-    attachInterrupt(digitalPinToInterrupt(ENCODER_KEY), encoder_key_interrupt_handler, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(ENCODER_KEY), key_interrupt_handler, CHANGE);
 }
 
-bool update_encoder()
+bool Encoder::update()
 {
     bool updated = false;
     encoder_state = digitalRead(ENCODER_S1);
@@ -75,7 +70,7 @@ bool update_encoder()
     return updated;
 }
 
-bool is_encoder_pressed()
+bool Encoder::is_pressed() const
 {
     return digitalRead(ENCODER_KEY) == ENCODER_KEY_PRESSED_LEVEL;
 }

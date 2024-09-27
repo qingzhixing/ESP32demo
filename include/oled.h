@@ -9,11 +9,11 @@
 #define OLED_DATA_PIN SDA
 #define OLED_RESET_PIN U8X8_PIN_NONE
 
-const U8G2 &oled_init();
+ U8G2 oled_init();
 
 /*
  * This function is used to get the global U8G2 object.
  * WARNING: This function should only be called after the OLED has been initialize!!!
  */
-const U8G2 &get_u8g2();
+ U8G2 get_u8g2();
 #endif // !_OLED_H

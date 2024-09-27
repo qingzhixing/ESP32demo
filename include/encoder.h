@@ -15,19 +15,40 @@ typedef void (*EncoderKeyCallback)(void);
  */
 typedef void (*EncoderTurnCallback)(bool direction);
 
-void encoder_init();
-/*
- * Called in timer interrupt to update the encoder position.
- * Returns true if the encoder position has changed.
- */
-bool update_encoder();
+class Encoder
+{
+public:
+    static Encoder &get_instance()
+    {
+        static Encoder instance;
+        return instance;
+    }
 
-// callback will be called in timer interrupt
-void set_on_encoder_press(EncoderKeyCallback callback);
-// callback will be called in timer interrupt
-void set_on_encoder_release(EncoderKeyCallback callback);
-// callback will be called in timer interrupt
-void set_on_encoder_turn(EncoderTurnCallback callback);
-bool is_encoder_pressed();
+public:
+    void init();
+    /*
+     * Called in timer interrupt to update the encoder position.
+     * Returns true if the encoder position has changed.
+     */
+    bool update();
+
+    // callback will be called in timer interrupt
+    void on_pressed(EncoderKeyCallback callback);
+    // callback will be called in timer interrupt
+    void on_released(EncoderKeyCallback callback);
+    // callback will be called in timer interrupt
+    void on_turned(EncoderTurnCallback callback);
+    bool is_pressed() const;
+
+public:
+    friend void key_interrupt_handler();
+
+private:
+    int16_t encoder_last_state;
+    int16_t encoder_state;
+    EncoderKeyCallback on_encoder_press_callback;
+    EncoderKeyCallback on_encoder_release_callback;
+    EncoderTurnCallback on_encoder_turn_callback;
+};
 
 #endif // !_ENCODER_H

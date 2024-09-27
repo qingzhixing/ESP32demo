@@ -9,7 +9,6 @@ void draw();
 
 void IRAM_ATTR timer_interrupt_handler()
 {
-    return;
     encoder_update();
 }
 
@@ -37,15 +36,15 @@ void setup()
     timer_init();
 }
 
-int16_t circle_r = 5;
-int16_t delta_x = 0;
-int16_t circle_x = 128 / 2;
-int16_t circle_y = 64 - circle_r - 5;
+uint8_t circle_r = 5;
+int8_t delta_x = 0;
+uint8_t circle_x = 128 / 2;
+uint8_t circle_y = 64 - circle_r - 5;
 void draw()
 {
-    auto display = U8G2_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_CB_TYPE, OLED_RESET_PIN, OLED_CLOCK_PIN, OLED_DATA_PIN);
     oled_display.clearBuffer();
-    oled_display.drawCircle(circle_x, circle_y, circle_r);
+    oled_display.drawStr(0, 10, "Hello, QZX!");
+    oled_display.drawCircle(abs(circle_x + delta_x), circle_y, circle_r);
     oled_display.sendBuffer();
 }
 

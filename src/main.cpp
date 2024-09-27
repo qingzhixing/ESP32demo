@@ -43,11 +43,10 @@ int16_t circle_x = 128 / 2;
 int16_t circle_y = 64 - circle_r - 5;
 void draw()
 {
-    auto display = get_oled_display();
-    display.print("Hello World!");
-    display.clearBuffer();
-    display.drawCircle(circle_x + delta_x, circle_y, circle_r);
-    display.sendBuffer();
+    auto display = U8G2_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_CB_TYPE, OLED_RESET_PIN, OLED_CLOCK_PIN, OLED_DATA_PIN);
+    oled_display.clearBuffer();
+    oled_display.drawCircle(circle_x, circle_y, circle_r);
+    oled_display.sendBuffer();
 }
 
 void encoder_turned(bool direction)

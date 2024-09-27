@@ -51,7 +51,7 @@ void encoder_init()
     on_encoder_release_callback = empty_key_callback;
     on_encoder_turn_callback = empty_turn_callback;
 
-    attachInterrupt(digitalPinToInterrupt(ENCODER_KEY), key_interrupt_handler, CHANGE);
+    // attachInterrupt(digitalPinToInterrupt(ENCODER_KEY), key_interrupt_handler, CHANGE);
 }
 
 void encoder_update()

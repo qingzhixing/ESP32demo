@@ -6,4 +6,5 @@
 #include "led.h"
 #include "global.h"
 #include "encoder.h"
+#include "screen.h"
 #endif // !_MAIN_H

@@ -1,5 +1,7 @@
 #include "main.h"
 
+static Screen *screen = nullptr;
+
 hw_timer_t *timer = nullptr;
 void serial_output();
 void screen_output();
@@ -32,22 +34,21 @@ void setup()
     serial_init();
 }
 
-int16_t circle_x = 64;
-int16_t circle_y = 32;
-int16_t circle_r = 16;
+int16_t circle_r = 5;
 int16_t delta_x = 0;
+int16_t circle_x = 128 / 2;
+int16_t circle_y = 64 - circle_r - 5;
 void screen_output()
 {
     auto u8g2 = get_u8g2();
     u8g2.clearBuffer();
     // u8g2.drawCircle(circle_x + delta_x, circle_y, circle_r);
-    u8g2.drawFilledEllipse(circle_x + delta_x, circle_y, circle_r, abs(circle_r + delta_x / 2));
+    u8g2.drawFilledEllipse(circle_x + delta_x, circle_y, circle_r, circle_r);
     u8g2.sendBuffer();
 }
 
 void loop()
 {
-    delta_x = encoder_count;
     screen_output();
 
     if (digitalRead(ENCODER_KEY) == LOW)

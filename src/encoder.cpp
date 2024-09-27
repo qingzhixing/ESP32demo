@@ -21,7 +21,7 @@ void Encoder::on_turned(EncoderTurnCallback callback)
 
 void key_interrupt_handler()
 {
-    auto encoder = Encoder::get_instance();
+    static auto encoder = Encoder::get_instance();
     if (encoder.is_pressed())
     {
         encoder.on_encoder_press_callback();

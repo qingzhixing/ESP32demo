@@ -15,7 +15,7 @@ typedef void (*EncoderKeyCallback)(void);
  */
 typedef void (*EncoderTurnCallback)(bool direction);
 
-class Encoder
+struct Encoder
 {
 public:
     static Encoder &get_instance()

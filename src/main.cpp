@@ -49,6 +49,7 @@ void draw()
 
 void encoder_turned(bool direction)
 {
+    Serial.printf("encoder turned,direction: %s\n", direction ? "right" : "left");
     delta_x += direction ? 1 : -1;
 }
 

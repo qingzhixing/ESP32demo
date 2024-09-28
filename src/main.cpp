@@ -1,8 +1,6 @@
 #include "main.h"
 #include "debug.h"
 
-static Screen screen;
-
 hw_timer_t *timer = nullptr;
 void serial_output();
 void draw();
@@ -36,26 +34,14 @@ void setup()
     timer_init();
 }
 
-uint8_t circle_r = 5;
-int8_t delta_x = 0;
-uint8_t circle_x = 128 / 2;
-uint8_t circle_y = 64 - circle_r - 5;
-void draw()
-{
-    oled_display.clearBuffer();
-    oled_display.drawStr(0, 10, "Hello, QZX!");
-    oled_display.drawCircle(abs(circle_x + delta_x), circle_y, circle_r);
-    oled_display.sendBuffer();
-}
-
 void encoder_turned(bool direction)
 {
     Serial.printf("encoder turned,direction: %s\n", direction ? "right" : "left");
-    delta_x += direction ? 1 : -1;
+    ui.circle_x += direction ? 1 : -1;
 }
 
 void loop()
 {
     on_encoder_turned(encoder_turned);
-    draw();
+    draw_frame();
 }

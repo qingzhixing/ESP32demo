@@ -11,9 +11,4 @@
 
 void oled_init();
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C oled_display;
-struct Screen
-{
-    const int width = 128;
-    const int height = 64;
-};
 #endif // !_OLED_H

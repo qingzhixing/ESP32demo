@@ -6,6 +6,7 @@ static int16_t encoder_state;
 static EncoderKeyCallback on_encoder_press_callback;
 static EncoderKeyCallback on_encoder_release_callback;
 static EncoderTurnCallback on_encoder_turn_callback;
+static bool encoder_last_turn_direction;
 
 static void empty_key_callback() {}
 static void empty_turn_callback(bool) {}
@@ -57,23 +58,34 @@ void encoder_init()
 void encoder_update()
 {
     encoder_state = digitalRead(ENCODER_S1);
+    bool updated = false;
     if (encoder_state != encoder_last_state)
     {
+        updated = true;
         // clockwise turn
         if (digitalRead(ENCODER_S2) == encoder_state)
         {
-            on_encoder_turn_callback(true);
+            encoder_last_turn_direction = true;
         }
         // counterclockwise turn
         else
         {
-            on_encoder_turn_callback(false);
+            encoder_last_turn_direction = false;
         }
     }
     encoder_last_state = encoder_state;
+    if (updated)
+    {
+        on_encoder_turn_callback(encoder_last_turn_direction);
+    }
 }
 
 bool is_encoder_pressed()
 {
     return digitalRead(ENCODER_KEY) == ENCODER_KEY_PRESSED_LEVEL;
+}
+
+bool get_encoder_turn_direction()
+{
+    return encoder_last_turn_direction;
 }

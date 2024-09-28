@@ -7,4 +7,5 @@
 #include "global.h"
 #include "encoder.h"
 #include "screen.h"
+#include "ui.h"
 #endif // !_MAIN_H

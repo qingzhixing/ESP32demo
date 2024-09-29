@@ -51,7 +51,8 @@ void UI::draw_circle()
         }
         else
         {
-            ui.circle_x = OLED_WIDTH - ui.circle_r + 1;
+            // FIXME: 超越左边界切换到右边界时错误的显示
+            ui.circle_x = OLED_WIDTH - ui.circle_r + 2;
         }
     }
 }

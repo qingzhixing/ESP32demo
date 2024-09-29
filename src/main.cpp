@@ -1,22 +1,4 @@
 #include "main.h"
-#include "debug.h"
-
-hw_timer_t *timer = nullptr;
-void serial_output();
-void draw();
-
-void IRAM_ATTR timer_interrupt_handler()
-{
-    encoder_update();
-}
-
-void timer_init()
-{
-    timer = timerBegin(0, 80, true);
-    timerAttachInterrupt(timer, &timer_interrupt_handler, true);
-    timerAlarmWrite(timer, 100ul, true);
-    timerAlarmEnable(timer);
-}
 
 void serial_init()
 {
@@ -32,6 +14,8 @@ void setup()
     serial_init();
     timer_init();
     ui.init();
+
+    register_timer_update(encoder_update);
 }
 
 void loop()

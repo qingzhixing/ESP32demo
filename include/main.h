@@ -7,4 +7,5 @@
 #include "encoder.h"
 #include "screen.h"
 #include "ui.h"
+#include "timer.h"
 #endif // !_MAIN_H

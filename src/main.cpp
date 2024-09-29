@@ -28,20 +28,13 @@ void setup()
 {
     led_init();
     led_on();
-    oled_init();
     encoder_init();
     serial_init();
     timer_init();
-}
-
-void encoder_turned(bool direction)
-{
-    Serial.printf("encoder turned,direction: %s\n", direction ? "right" : "left");
-    ui.circle_x += direction ? 1 : -1;
+    ui.init();
 }
 
 void loop()
 {
-    on_encoder_turned(encoder_turned);
-    draw_frame();
+    ui.update_frame();
 }

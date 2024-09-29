@@ -9,6 +9,9 @@
 #define OLED_DATA_PIN SDA
 #define OLED_RESET_PIN U8X8_PIN_NONE
 
+#define OLED_WIDTH 128
+#define OLED_HEIGHT 64
+
 void oled_init();
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C oled_display;
 #endif // !_OLED_H

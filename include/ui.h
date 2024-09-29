@@ -5,20 +5,17 @@
 #include "oled.h"
 #include "encoder.h"
 
-struct Screen
-{
-    static const int width = 128;
-    static const int height = 64;
-};
-
 struct UI
 {
     uint8_t circle_r = 5;
-    uint8_t circle_x = 64;
-    uint8_t circle_y = 64 - circle_r - 5;
-};
-extern UI ui;
+    uint8_t circle_x = OLED_WIDTH / 2;
+    uint8_t circle_y = OLED_HEIGHT - circle_r - 5;
 
-void draw_frame();
+    void init();
+    void update_frame();
+    void draw_circle();
+};
+
+extern UI ui;
 
 #endif // !_UI_H
